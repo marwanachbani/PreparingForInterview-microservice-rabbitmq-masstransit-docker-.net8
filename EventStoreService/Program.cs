@@ -14,8 +14,12 @@ builder.Services.AddScoped<UserCreatedConsumer>();
 // Configure MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<UserCreatedConsumer>();
-    x.AddConsumer<ProductCreatedConsumer>();
+    x.SetKebabCaseEndpointNameFormatter();
+    var assem = typeof(Program).Assembly;
+    x.AddConsumers(assem);
+    x.AddSagaStateMachines(assem);
+    x.AddSagas(assem);
+    x.AddActivities(assem);
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("rabbitmq", h =>

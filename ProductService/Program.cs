@@ -20,6 +20,12 @@ var key = Encoding.ASCII.GetBytes(jwtConfig["Key"]);
 builder.Services.AddTransient<IEventPublisher, EventPublisher>();
 builder.Services.AddMassTransit(x =>
 {
+    x.SetKebabCaseEndpointNameFormatter();
+    var assem = typeof(Program).Assembly;
+    x.AddConsumers(assem);
+    x.AddSagaStateMachines(assem);
+    x.AddSagas(assem);
+    x.AddActivities(assem);
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("rabbitmq", h =>
