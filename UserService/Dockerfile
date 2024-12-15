@@ -7,14 +7,15 @@ WORKDIR /src
 # Copy SharedLibrary project
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
 
-# Copy current service project
+# Copy UserService project
 COPY ["UserService/UserService.csproj", "UserService/"]
 
-# Restore dependencies, including SharedLibrary
+# Restore dependencies
 RUN dotnet restore "UserService/UserService.csproj"
 
 # Copy all source files
-COPY . .
+COPY ./SharedLibrary ./SharedLibrary
+COPY ./UserService ./UserService
 
 # Build the service
 WORKDIR "/src/UserService"
