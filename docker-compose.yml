@@ -1,8 +1,5 @@
 
 
-  
-
-
 services:
   mariadb:
     image: mariadb:latest
@@ -23,7 +20,6 @@ services:
       timeout: 10s
       retries: 10
 
-
   rabbitmq:
     image: rabbitmq:3-management
     environment:
@@ -37,10 +33,13 @@ services:
 
   orderservice:
     build:
-      context: .
-      dockerfile: ./OrderService/Dockerfile
+      context: ./OrderService
+      dockerfile: Dockerfile
     environment:
-      
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JWT_KEY=your-secure-key
+      - JWT_ISSUER=UserService
+      - JWT_AUDIENCE=UserServiceAudience
     ports:
       - "5002:8080"
     networks:
@@ -53,10 +52,13 @@ services:
 
   productservice:
     build:
-      context: .
-      dockerfile: ./ProductService/Dockerfile
+      context: ./ProductService
+      dockerfile: Dockerfile
     environment:
-      
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JWT_KEY=your-secure-key
+      - JWT_ISSUER=UserService
+      - JWT_AUDIENCE=UserServiceAudience
     ports:
       - "5001:8080"
     networks:
@@ -69,13 +71,13 @@ services:
 
   userservice:
     build:
-      context: .
-      dockerfile: ./UserService/Dockerfile
+      context: ./UserService
+      dockerfile: Dockerfile
     environment:
+      - ASPNETCORE_ENVIRONMENT=Development
       - JWT_KEY=your-secure-key
       - JWT_ISSUER=UserService
       - JWT_AUDIENCE=UserServiceAudience
-      
     ports:
       - "5000:8080"
     networks:
@@ -88,10 +90,13 @@ services:
 
   eventstoreservice:
     build:
-      context: .
-      dockerfile: ./EventStoreService/Dockerfile
+      context: ./EventStoreService
+      dockerfile: Dockerfile
     environment:
-      
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JWT_KEY=your-secure-key
+      - JWT_ISSUER=UserService
+      - JWT_AUDIENCE=UserServiceAudience
     ports:
       - "5003:8080"
     networks:
