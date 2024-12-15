@@ -1,5 +1,6 @@
 ﻿using EventStoreService.Data;
 using EventStoreService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace EventStoreService.Controllers
         {
             _dbContext = dbContext;
         }
-
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet]
         public async Task<ActionResult<List<StoredEvent>>>GetAll()
         {
