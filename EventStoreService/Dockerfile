@@ -7,10 +7,10 @@ WORKDIR /src
 # Copy SharedLibrary project
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
 
-# Copy EvenStoreService project
+# Copy service-specific project
 COPY ["EvenStoreService/EvenStoreService.csproj", "EvenStoreService/"]
 
-# Restore dependencies
+# Restore dependencies, including SharedLibrary
 RUN dotnet restore "EvenStoreService/EvenStoreService.csproj"
 
 # Copy all source files

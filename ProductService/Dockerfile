@@ -7,10 +7,10 @@ WORKDIR /src
 # Copy SharedLibrary project
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
 
-# Copy ProductService project
+# Copy service-specific project
 COPY ["ProductService/ProductService.csproj", "ProductService/"]
 
-# Restore dependencies
+# Restore dependencies, including SharedLibrary
 RUN dotnet restore "ProductService/ProductService.csproj"
 
 # Copy all source files
