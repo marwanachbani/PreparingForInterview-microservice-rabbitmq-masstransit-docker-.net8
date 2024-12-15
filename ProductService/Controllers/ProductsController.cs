@@ -28,7 +28,7 @@ namespace ProductService.Controllers
             return await _context.Products.ToListAsync();
         }
 
-        //[Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {

@@ -45,12 +45,12 @@ namespace UserService.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(User user)
+        public async Task<IActionResult> Login(string userName , string password)
         {
             var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == user.Username);
+                .FirstOrDefaultAsync(u => u.Username == userName);
 
-            if (existingUser == null || !BCrypt.Net.BCrypt.Verify(user.PasswordHash, existingUser.PasswordHash))
+            if (existingUser == null || !BCrypt.Net.BCrypt.Verify(password, existingUser.PasswordHash))
             {
                 return Unauthorized("Invalid username or password");
             }
