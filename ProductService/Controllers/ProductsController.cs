@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductService.Data;
-using ProductService.Events;
 using ProductService.Models;
 using ProductService.Services;
+using SharedLibrary.Events;
 
 namespace ProductService.Controllers
 {

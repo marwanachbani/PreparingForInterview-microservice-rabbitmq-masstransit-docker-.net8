@@ -3,6 +3,7 @@ using EventStoreService.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using SharedLibrary.Events;
 
 namespace EventStoreService.Consumers
 {
@@ -30,8 +31,5 @@ namespace EventStoreService.Consumers
             await _dbContext.SaveChangesAsync();
         }
     }
-    public class ProductCreatedEvent
-    {
-        public string ProductName { get; set; }
-    }
+    
 }
