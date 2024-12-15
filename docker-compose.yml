@@ -1,5 +1,8 @@
 
 
+  
+
+
 services:
   mariadb:
     image: mariadb:latest
@@ -20,6 +23,7 @@ services:
       timeout: 10s
       retries: 10
 
+
   rabbitmq:
     image: rabbitmq:3-management
     environment:
@@ -32,7 +36,9 @@ services:
       - my_network
 
   orderservice:
-    build: ./OrderService
+    build:
+      context: .
+      dockerfile: ./OrderService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -46,7 +52,9 @@ services:
         condition: service_started
 
   productservice:
-    build: ./ProductService
+    build:
+      context: .
+      dockerfile: ./ProductService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -60,7 +68,9 @@ services:
         condition: service_started
 
   userservice:
-    build: ./UserService
+    build:
+      context: .
+      dockerfile: ./UserService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -74,7 +84,9 @@ services:
         condition: service_started
 
   eventstoreservice:
-    build: ./EventStoreService
+    build:
+      context: .
+      dockerfile: ./EventStoreService/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -86,7 +98,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_started
-        
+
 networks:
   my_network:
     driver: bridge
