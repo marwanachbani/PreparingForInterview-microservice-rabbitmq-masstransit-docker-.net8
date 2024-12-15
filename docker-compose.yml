@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   mariadb:
@@ -12,6 +12,13 @@ services:
       - "3306:3306"
     networks:
       - my_network
+    volumes:
+      - ./db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u my_user --password=my_password || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -25,9 +32,7 @@ services:
       - my_network
 
   orderservice:
-    build:
-      context: .
-      dockerfile: ./OrderService/Dockerfile
+    build: ./OrderService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -41,9 +46,7 @@ services:
         condition: service_started
 
   productservice:
-    build:
-      context: .
-      dockerfile: ./ProductService/Dockerfile
+    build: ./ProductService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -57,9 +60,7 @@ services:
         condition: service_started
 
   userservice:
-    build:
-      context: .
-      dockerfile: ./UserService/Dockerfile
+    build: ./UserService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -73,9 +74,7 @@ services:
         condition: service_started
 
   eventstoreservice:
-    build:
-      context: .
-      dockerfile: ./EventStoreService/Dockerfile
+    build: ./EventStoreService
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports:
@@ -87,7 +86,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_started
-
+        
 networks:
   my_network:
     driver: bridge
