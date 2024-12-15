@@ -8,23 +8,23 @@ WORKDIR /src
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
 
 # Copy service-specific project
-COPY ["EvenStoreService/EvenStoreService.csproj", "EvenStoreService/"]
+COPY ["EventStoreService/EventStoreService.csproj", "EventStoreService/"]
 
 # Restore dependencies, including SharedLibrary
-RUN dotnet restore "EvenStoreService/EvenStoreService.csproj"
+RUN dotnet restore "EventStoreService/EventStoreService.csproj"
 
 # Copy all source files
 COPY ./SharedLibrary ./SharedLibrary
-COPY ./EvenStoreService ./EvenStoreService
+COPY ./EventStoreService ./EventStoreService
 
 # Build the service
-WORKDIR "/src/EvenStoreService"
-RUN dotnet build "EvenStoreService.csproj" -c Release -o /app/build
+WORKDIR "/src/EventStoreService"
+RUN dotnet build "EventStoreService.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "EvenStoreService.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "EventStoreService.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "EvenStoreService.dll"]
+ENTRYPOINT ["dotnet", "EventStoreService.dll"]
