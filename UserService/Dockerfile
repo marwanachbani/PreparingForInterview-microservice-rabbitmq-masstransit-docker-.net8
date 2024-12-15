@@ -1,20 +1,29 @@
-# Use .NET 8 SDK as the base image
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-# Copy project files and restore dependencies
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
 # Copy SharedLibrary project
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
-COPY *.csproj ./
-RUN dotnet restore
 
-# Copy remaining files and build the project
-COPY . ./
-RUN dotnet publish -c Release -o out
+# Copy current service project
+COPY ["UserService/UserService.csproj", "UserService/"]
 
-# Use ASP.NET Core runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Restore dependencies, including SharedLibrary
+RUN dotnet restore "UserService/UserService.csproj"
+
+# Copy all source files
+COPY . .
+
+# Build the service
+WORKDIR "/src/UserService"
+RUN dotnet build "UserService.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "UserService.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/out .
-
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "UserService.dll"]

@@ -1,24 +1,29 @@
-# Use .NET SDK for building the project
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-# Copy the .csproj file and restore dependencies
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
 # Copy SharedLibrary project
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
-COPY *.csproj ./
-RUN dotnet restore
 
-# Copy the rest of the files and build the app
-COPY . ./
-RUN dotnet publish -c Release -o out
+# Copy current service project
+COPY ["EventStoreService/EventStoreService.csproj", "EventStoreService/"]
 
-# Use ASP.NET Core runtime for the runtime environment
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Restore dependencies, including SharedLibrary
+RUN dotnet restore "EventStoreService/EventStoreService.csproj"
+
+# Copy all source files
+COPY . .
+
+# Build the service
+WORKDIR "/src/EventStoreService"
+RUN dotnet build "EventStoreService.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "EventStoreService.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/out .
-
-# Expose the port your application will run on
-
-
-# Set the entry point for the container to the ProductService.dll
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "EventStoreService.dll"]
