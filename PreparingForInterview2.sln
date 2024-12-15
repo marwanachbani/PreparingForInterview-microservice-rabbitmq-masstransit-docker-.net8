@@ -11,8 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService", "OrderServic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventStoreService", "EventStoreService\EventStoreService.csproj", "{C85B4C80-A5F3-42F1-8A74-7EE91C1D05FC}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SharedClass", "SharedClass\SharedClass.fsproj", "{8FBBDE27-5AD0-4FEC-974F-0D004F0EEF88}"
-EndProject
+
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "SharedLibrary\SharedLibrary.csproj", "{CCF220C2-05A2-4684-9092-26730B5136BE}"
 EndProject
 Global
