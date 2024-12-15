@@ -3,6 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the .csproj file and restore dependencies
+# Copy SharedLibrary project
+COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
 COPY *.csproj ./
 RUN dotnet restore
 
