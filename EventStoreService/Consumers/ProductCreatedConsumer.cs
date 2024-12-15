@@ -22,7 +22,7 @@ namespace EventStoreService.Consumers
         {
             var storedEvent = new StoredEvent
             {
-                EventType = nameof(UserCreatedEvent),
+                EventType = nameof(ProductCreatedEvent),
                 Data = JsonConvert.SerializeObject(context.Message)
             };
 
