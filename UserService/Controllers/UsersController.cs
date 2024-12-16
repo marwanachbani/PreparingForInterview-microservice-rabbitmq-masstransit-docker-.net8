@@ -81,7 +81,7 @@ namespace UserService.Controllers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                new Claim("Role", user.Role)
+                new Claim("Role", user.Role) 
             };
 
             var token = new JwtSecurityToken(
