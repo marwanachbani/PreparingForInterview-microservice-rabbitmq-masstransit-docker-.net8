@@ -60,7 +60,7 @@ namespace UserService.Controllers
             return Ok(new { token });
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles= "admin")]
         [HttpGet]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
