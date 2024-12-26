@@ -73,7 +73,7 @@ namespace UserService.Controllers
             return results;
         }
 
-        public string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user)
         {
             var claims = new[]
             {
