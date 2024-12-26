@@ -14,7 +14,7 @@ using UserService.Services;
 
 namespace UserService.Controllers
 {
-    [Authorize]
+
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -60,7 +60,7 @@ namespace UserService.Controllers
             return Ok(new { token });
         }
 
-        [Authorize(Roles= "admin")]
+        [Authorize(Policy ="AdminOnly")]
         [HttpGet]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
