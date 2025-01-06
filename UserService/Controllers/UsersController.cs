@@ -14,7 +14,7 @@ using UserService.Services;
 
 namespace UserService.Controllers
 {
-
+    [Authorize(Policy = "AdminPolicy")]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
