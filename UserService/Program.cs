@@ -1,73 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-using MassTransit;
-using UserService.Data;
-using UserService.Models;
-using System.Threading;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using System.Text;
+using UserService.Models;
 using UserService.Services;
-using UserService.Events;
 
-// Configure the builder and services
 var builder = WebApplication.CreateBuilder(args);
 
-// Set up DbContext for MariaDB
-builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("MariaDb"),
-    new MariaDbServerVersion(new Version(10, 5, 9))));
-builder.Services.AddScoped<IEventPublisher, EventPublisher>();
-// Configure MassTransit with RabbitMQ
-builder.Services.AddMassTransit(x =>
-{
-    x.SetKebabCaseEndpointNameFormatter();
-    var assem = typeof(Program).Assembly;
-    x.AddConsumers(assem);
-    x.AddSagaStateMachines(assem);
-    x.AddSagas(assem);
-    x.AddActivities(assem);
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host("rabbitmq", h =>
-        {
-            h.Username("user");
-            h.Password("password");
-        });
-
-        
-        
-    });
-});
-
+// Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new() { Title = "ProductService API", Version = "v1" });
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter JWT with Bearer prefix",
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
-    });
-});
+builder.Services.AddDbContext<UserService.Data.UserDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+    new MySqlServerVersion(new Version(8, 0, 21))));
+
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtConfig["Key"]);
 
@@ -84,24 +32,36 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidIssuer = jwtConfig["Issuer"],
-        ValidAudience = jwtConfig["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
+        ValidAudience = jwtConfig["Audience"]
     };
 });
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireClaim("Role", "admin"));
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
 });
 
 var app = builder.Build();
 
-// Check MariaDB container readiness, apply migrations, and seed database
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<UserDbContext>();
+    var context = services.GetRequiredService<UserService.Data.UserDbContext>();
 
     // Wait for MariaDB to be ready
     var isDatabaseReady = false;
@@ -117,50 +77,14 @@ using (var scope = app.Services.CreateScope())
         catch
         {
             retries--;
-            Thread.Sleep(2000); // Wait 2 seconds before retrying
+            Thread.Sleep(2000); // Wait for 2 seconds before retrying
         }
     }
 
     if (!isDatabaseReady)
     {
-        throw new Exception("Unable to connect to MariaDB after multiple retries.");
+        throw new Exception("Unable to connect to the database.");
     }
-
-    // Apply pending migrations and seed the admin user
-    context.Database.Migrate();
-    SeedAdminUser(context);
 }
 
-// Swagger setup for development
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.MapControllers();
 app.Run();
-
-// Seed admin user with hashed password
-void SeedAdminUser(UserDbContext context)
-{
-    // Check if any users exist
-    if (!context.Users.Any())
-    {
-        // Hash the admin password
-        var password = "AdminPassword123"; // Change this password for production!
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-        // Create the initial admin user
-        var adminUser = new User
-        {
-            Username = "admin",
-            PasswordHash = passwordHash,
-            Role = "admin"
-        };
-
-        // Add and save the admin user to the database
-        context.Users.Add(adminUser);
-        context.SaveChanges();
-    }
-}
